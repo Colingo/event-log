@@ -22,6 +22,9 @@
     "cache-reduce": "git://github.com/Raynos/cache-reduce",
     "xtend": "~1.0.3"
   },
+  "peerDependencies": {
+    "reducible": "git://github.com/Raynos/reducible#1.x"
+  },
   "devDependencies": {
     "tape": "~0.2.2",
     "browserify": "https://github.com/raynos/node-browserify/tarball/master",
