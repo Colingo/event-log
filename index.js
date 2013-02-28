@@ -50,7 +50,7 @@ function eventLog(col, options) {
 
     var source = concat(
         cache(find(rawCollection, {
-            "value.timestamp": {
+            "timestamp": {
                 $gt: Date.now() - timeToLive * 2
                 , $lt: Date.now()
             }
@@ -118,7 +118,7 @@ function createCursor(col, options) {
     var lastTime = options.timestamp || Date.now()
 
     var cursor = find(col, {
-        "value.timestamp": {
+        "timestamp": {
             $gte: lastTime
         }
     }, {
@@ -131,7 +131,7 @@ function createCursor(col, options) {
     })
 
     return hub(concat(map(cursor, function (item) {
-        options.timestamp = item.value.timestamp
+        options.timestamp = item.timestamp
         return item
     }), lazy(createCursor, col, options)))
 }
