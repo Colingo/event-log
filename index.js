@@ -61,15 +61,17 @@ function eventLog(col, options) {
     return { add: add, read: read }
 
     function add(type, value) {
-        var item = { eventType: type, value: value }
+        var now = Date.now()
 
         return merge([
             insert(col, {
                 eventType: type
+                , timestamp: now
                 , value: value
             }, { safe: true })
             , insert(rawCollection, {
                 eventType: type
+                , timestamp: now
                 , value: value
             }, { safe: true })
         ])
