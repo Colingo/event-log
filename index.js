@@ -79,7 +79,7 @@ function eventLog(col, options) {
 
     function read(ts) {
         return filter(source, function (item) {
-            return item.value.timestamp > ts
+            return item.timestamp > ts
         })
     }
 }
