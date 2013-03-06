@@ -13,6 +13,7 @@ var reduce = require("reducible/reduce")
 var cache = require("cache-reduce/cache")
 
 var extend = require("xtend")
+var setTimeout = require("timers").setTimeout
 
 var slice = Array.prototype.slice
 var SECOND = 1000
@@ -101,7 +102,7 @@ function BufferedCursor(cursor, options) {
                     break
                 }
 
-                if (item.value.timestamp < now - timeToLive) {
+                if (item.timestamp < now - timeToLive) {
                     buffer.shift()
                 } else {
                     break
@@ -140,6 +141,8 @@ function lazy(f) {
     var args = slice.call(arguments, 1)
 
     return reducible(function (next, initial) {
-        reduce(f.apply(null, args), next, initial)
+        setTimeout(function () {
+            reduce(f.apply(null, args), next, initial)
+        }, 1000)
     })
 }

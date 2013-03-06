@@ -17,7 +17,7 @@
     "email": "raynos2@gmail.com"
   },
   "dependencies": {
-    "mongo-client": "~0.1.5",
+    "mongo-client": "~0.1.6",
     "reducers": "git://github.com/Raynos/reducers",
     "cache-reduce": "git://github.com/Raynos/cache-reduce",
     "xtend": "~1.0.3"
