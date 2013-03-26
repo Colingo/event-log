@@ -1,6 +1,6 @@
 {
   "name": "event-log",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "An append only event log with streaming support",
   "keywords": [],
   "author": "Raynos <raynos2@gmail.com>",
