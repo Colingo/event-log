@@ -61,8 +61,17 @@ function eventLog(col, options) {
 
     return { add: add, read: read }
 
-    function add(type, value) {
+    function add(type, value, realtime) {
         var now = Date.now()
+        var intoRaw = insert(rawCollection, {
+            eventType: type
+            , timestamp: now
+            , value: value
+        }, { safe: true })
+
+        if (realtime === false) {
+            return intoRaw
+        }
 
         return merge([
             insert(col, {
@@ -70,11 +79,7 @@ function eventLog(col, options) {
                 , timestamp: now
                 , value: value
             }, { safe: true })
-            , insert(rawCollection, {
-                eventType: type
-                , timestamp: now
-                , value: value
-            }, { safe: true })
+            , intoRaw
         ])
     }
 
