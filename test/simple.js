@@ -125,7 +125,6 @@ test("can read from eventLog", function (assert) {
         function cleanup() {
             log.close()
 
-            console.log("cleanup")
             client.close(function (err) {
                 assert.ifError(err)
 

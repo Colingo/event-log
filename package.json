@@ -24,7 +24,7 @@
   "devDependencies": {
     "tape": "~1.0.1",
     "node-uuid": "~1.4.0",
-    "continuable-mongo": "~0.1.5"
+    "continuable-mongo": "~0.1.6"
   },
   "licenses": [
     {
