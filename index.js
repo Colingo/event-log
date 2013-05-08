@@ -1,32 +1,19 @@
-var insert = require("mongo-client/insert")
-var find = require("mongo-client/find")
+var timestamp = require("monotonic-timestamp")
 
-var filter = require("reducers/filter")
-var merge = require("reducers/merge")
-var hub = require("reducers/hub")
-var map = require("reducers/map")
-var concat = require("reducers/concat")
-var expand = require("reducers/expand")
-
-var reducible = require("reducible/reducible")
-var reduce = require("reducible/reduce")
-var cache = require("cache-reduce/cache")
-
-var extend = require("xtend")
-var setTimeout = require("timers").setTimeout
-
-var slice = Array.prototype.slice
-var SECOND = 1000
-var MINUTE = 60 * SECOND
-var HOUR = 60 * MINUTE
+var CursorStream = require("./lib/cursor-stream")
+var BufferedCursor = require("./lib/buffered-cursor")
 
 module.exports = eventLog
 
 /* Semantics::
 
+    ## Addition
+
     When inserting it inserts into the collection as normal.
 
-    insert(type, data) does `insert(col, { eventType: type, value: data })`
+    add(type, data) does `col.insert({ eventType: type, value: data })`
+
+    ## Reading
 
     When reading it creates a single Tailable cursor and stores any
     events in a buffered queue based on insertion order where the
@@ -34,120 +21,68 @@ module.exports = eventLog
 
     The queue should support reading in insertion order.
 
-    When read is called we return `concat(reverse(queue), cursor)`
+    When read is called we return `concat(queue, cursor)`
 
     When we create a fresh cursor we should read from the persisted
     collection for items between now and (now - TIME_TO_LIVE)
 
     Every time a TIME_TO_LIVE window passes the buffer should drop
-    the last window out of memory
+    the last window out of memorycd ev
 
 */
-function eventLog(col, options) {
-    var cursor = createCursor(col, options)
-    var bufferedCursor = BufferedCursor(cursor, options)
+function eventLog(collection, options) {
     var rawCollection = options.rawCollection
-    var timeToLive = options.timeToLive || HOUR
+    if (!options.timeToLive) {
+        options.timeToLive = 120 * 1000
+    }
 
-    var source = concat(
-        cache(find(rawCollection, {
-            "timestamp": {
-                $gt: Date.now() - timeToLive * 2
-                , $lt: Date.now()
-            }
-        }))
-        , bufferedCursor
-    )
+    var cursorStream = CursorStream(collection, options)
+    var bufferedCursor = BufferedCursor(cursorStream, options)
 
-    return { add: add, read: read }
+    return { add: add, read: read, close: close }
 
-    function add(type, value, realtime) {
-        var now = Date.now()
-        var intoRaw = insert(rawCollection, {
-            eventType: type
-            , timestamp: now
-            , value: value
-        }, { safe: true })
-
-        if (realtime === false) {
-            return intoRaw
+    function add(type, value, realtime, cb) {
+        if (typeof realtime === "function") {
+            cb = realtime
+            realtime = true
         }
 
-        return merge([
-            insert(col, {
-                eventType: type
-                , timestamp: now
-                , value: value
-            }, { safe: true })
-            , intoRaw
-        ])
+        var now = timestamp()
+        var counter = realtime ? 1 : 2
+
+        rawCollection.insert([{
+            eventType: type,
+            timestamp: now,
+            value: value
+        }], { safe: true }, handleResult)
+
+        if (realtime !== false) {
+            collection.insert([{
+                eventType: type,
+                timestamp: now,
+                value: value
+            }], { safe: true }, handleResult)
+        }
+
+        function handleResult(err, records) {
+            if (err) {
+                return cb(err)
+            }
+
+            if (--counter === 0) {
+                cb(null, records[0])
+            }
+        }
     }
 
     function read(ts) {
-        return filter(source, function (item) {
-            return item.timestamp > ts
+        return bufferedCursor(function (x) {
+            return x.timestamp > ts
         })
     }
-}
 
-function BufferedCursor(cursor, options) {
-    var timeToLive = options.timeToLive || HOUR
-    var buffer = []
-
-    return merge([
-        hub(expand(cursor, function (item) {
-            var now = Date.now()
-
-            buffer.push(item)
-
-            for (var i = 0; i < buffer.length; i++) {
-                var item = buffer[0]
-
-                if (!item) {
-                    break
-                }
-
-                if (item.timestamp < now - timeToLive) {
-                    buffer.shift()
-                } else {
-                    break
-                }
-            }
-        }))
-        , concat(buffer, cursor)
-    ])
-}
-
-function createCursor(col, options) {
-    options = extend({}, options)
-
-    var lastTime = options.timestamp || Date.now()
-
-    var cursor = find(col, {
-        "timestamp": {
-            $gte: lastTime
-        }
-    }, {
-        sort: {
-            $natural: 1
-        }
-        , tailable: true
-        , awaitdata: true
-        , numberOfRetries: -1
-    })
-
-    return hub(concat(map(cursor, function (item) {
-        options.timestamp = item.timestamp
-        return item
-    }), lazy(createCursor, col, options)))
-}
-
-function lazy(f) {
-    var args = slice.call(arguments, 1)
-
-    return reducible(function (next, initial) {
-        setTimeout(function () {
-            reduce(f.apply(null, args), next, initial)
-        }, 1000)
-    })
+    function close() {
+        cursorStream.destroy()
+        bufferedCursor.destroy()
+    }
 }

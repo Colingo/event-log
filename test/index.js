@@ -1,2 +1,1 @@
-require("./add")
-require("./old")
+require("./simple")

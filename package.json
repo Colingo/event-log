@@ -17,18 +17,14 @@
     "email": "raynos2@gmail.com"
   },
   "dependencies": {
-    "mongo-client": "~0.2.1",
-    "reducers": "Raynos/reducers#dedup",
-    "cache-reduce": "Raynos/cache-reduce#dedup",
-    "xtend": "~1.0.3",
-    "reducible": "Raynos/reducible#v1.0.6"
+    "monotonic-timestamp": "0.0.8",
+    "through": "~2.3.4",
+    "reconnect": "git://github.com/Raynos/reconnect"
   },
   "devDependencies": {
-    "tape": "~0.2.2",
-    "browserify": "https://github.com/raynos/node-browserify/tarball/master",
+    "tape": "~1.0.1",
     "node-uuid": "~1.4.0",
-    "introspect-reduce": "~1.0.1",
-    "callback-reduce": "Raynos/callback-reduce#dedup"
+    "continuable-mongo": "~0.1.5"
   },
   "licenses": [
     {
