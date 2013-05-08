@@ -24,7 +24,6 @@ The event log is designed for real time events and should be used
 
 ```js
 var eventLog = require("event-log")
-var fold = require("reducers/fold")
 
 /* get a mongoDB guy somehow */
 var db = someMongoDb
@@ -49,12 +48,14 @@ var log = eventLog(realtimeCollection, {
 log.add("event-type", {
     /* some data */
     timestamp: Date.now()
+}, function (err, record) {
+    // inserted data
 })
 
 /* infinite stream of data */
 var stream = log.read(Date.now() - 1000)
 
-fold(stream, function (item) {
+stream.on("data", function (item) {
     /* item from event log */
 })
 ```
