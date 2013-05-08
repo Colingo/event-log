@@ -72,7 +72,7 @@ stream.on("data", function (item) {
 
   [1]: https://secure.travis-ci.org/Colingo/event-log.png
   [2]: http://travis-ci.org/Colingo/event-log
-  [3]: http://david-dm.org/Colingo/event-log/status.png
+  [3]: http://david-dm.org/Colingo/event-log.png
   [4]: http://david-dm.org/Colingo/event-log
   [5]: http://ci.testling.com/Colingo/event-log.png
   [6]: http://ci.testling.com/Colingo/event-log
