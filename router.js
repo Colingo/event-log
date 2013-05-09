@@ -1,6 +1,6 @@
 var jsonBody = require("body/json")
 var sendJson = require("send-data/json")
-var Router = require("routes").Router
+var Router = require("routes")
 
 var isSend = /\/send$/
 var isQuery = /.*\/query\/(.+)/
@@ -51,7 +51,7 @@ function EventLogRouter(log, opts) {
         var isQueryRequest = uri.match(isQuery)
 
         if (!isSendRequest && !isQueryRequest) {
-            return fourofour(req, res)
+            return notFound(req, res)
         }
 
         jsonBody(req, res)(function (err, body) {
@@ -78,7 +78,7 @@ function EventLogRouter(log, opts) {
             }
 
             if (!route) {
-                return fourofour(req, res)
+                return notFound(req, res)
             }
 
             route.fn(req, res, body, route.params)
