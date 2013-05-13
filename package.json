@@ -19,7 +19,7 @@
   "dependencies": {
     "monotonic-timestamp": "0.0.8",
     "through": "~2.3.4",
-    "reconnect": "git://github.com/Raynos/reconnect",
+    "reconnect": "~1.2.1",
     "body": "~1.0.1",
     "routes": "~0.2.0",
     "send-data": "~1.0.1"
