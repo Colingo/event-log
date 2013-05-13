@@ -22,7 +22,8 @@
     "reconnect": "~1.2.1",
     "body": "~1.0.1",
     "routes": "~0.2.0",
-    "send-data": "~1.0.1"
+    "send-data": "~1.0.1",
+    "xtend": "~2.0.3"
   },
   "devDependencies": {
     "tape": "~1.0.1",

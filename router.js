@@ -1,6 +1,8 @@
 var jsonBody = require("body/json")
 var sendJson = require("send-data/json")
 var Router = require("routes")
+var extend = require("util")._extend
+var EventEmitter = require("events").EventEmitter
 
 var isSend = /\/send$/
 var isQuery = /.*\/query\/(.+)/
@@ -43,6 +45,9 @@ function EventLogRouter(log, opts) {
         router.addRoute(uri, fn)
     }
 
+    extend(handler, EventEmitter.prototype)
+    handler._events = {}
+
     return handler
 
     function handler(req, res) {
@@ -72,6 +77,8 @@ function EventLogRouter(log, opts) {
                 } else {
                     route = router.match("/event")
                 }
+
+                handler.emit("event", req, res, body)
             } else if (isQueryRequest) {
                 var viewName = isQueryRequest[1]
                 route = router.match("/query/" + viewName)
